@@ -16,14 +16,17 @@ const PaginaAnaliseIA = () => {
   const [resultadosIA, setResultadosIA] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const handleFileUpload = (event) => {
-    const arquivo = event.target.files[0];
-    setArquivoSelecionado(arquivo);
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const arquivo = event.target.files?.[0];
+    if (!arquivo) return;
+    setArquivoSelecionado(arquivo as any);
 
     // Ler conteúdo do arquivo
     const reader = new FileReader();
-    reader.onload = (e) => {
-      setTextoAnalise(e.target.result);
+    reader.onload = (e: ProgressEvent<FileReader>) => {
+      if (e.target && typeof e.target.result === 'string') {
+        setTextoAnalise(e.target.result);
+      }
     };
     reader.readAsText(arquivo);
   };
@@ -81,7 +84,7 @@ const PaginaAnaliseIA = () => {
                 </label>
                 {arquivoSelecionado && (
                   <p className="mt-2 text-sm text-gray-500">
-                    Arquivo selecionado: {arquivoSelecionado.name}
+                    Arquivo selecionado: {(arquivoSelecionado as File).name}
                   </p>
                 )}
               </div>
@@ -116,7 +119,7 @@ const PaginaAnaliseIA = () => {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {resultadosIA.diagnostico_ia.map((diag, index) => (
+                    {resultadosIA?.diagnostico_ia?.map((diag: { categoria: string; probabilidade: number }, index: number) => (
                       <div key={index} className="flex justify-between bg-gray-100 p-2 rounded mt-2">
                         <span>{diag.categoria}</span>
                         <span>{(diag.probabilidade * 100).toFixed(2)}%</span>

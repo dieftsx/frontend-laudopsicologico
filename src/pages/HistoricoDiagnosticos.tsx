@@ -29,15 +29,14 @@ const HistoricoDiagnosticos = () => {
   };
 
   const filtrarDiagnosticos = () => {
-    return diagnosticos.filter(diagnostico => {
-      const matchFiltro = diagnostico.paciente.nome.toLowerCase().includes(filtro.toLowerCase()) ||
-                         diagnostico.id.toLowerCase().includes(filtro.toLowerCase());
+    return diagnosticos.filter((diagnostico: any) => {
+      const matchFiltro = diagnostico.paciente?.nome?.toLowerCase().includes(filtro.toLowerCase()) ||
+                         diagnostico.id?.toLowerCase().includes(filtro.toLowerCase()) || '';
       
       if (periodo === 'todos') return matchFiltro;
-      
       const data = new Date(diagnostico.criado_em);
       const hoje = new Date();
-      const diffDias = Math.floor((hoje - data) / (1000 * 60 * 60 * 24));
+      const diffDias = Math.floor((hoje.getTime() - data.getTime()) / (1000 * 60 * 60 * 24));
       
       switch(periodo) {
         case '7dias': return diffDias <= 7 && matchFiltro;
@@ -48,7 +47,7 @@ const HistoricoDiagnosticos = () => {
     });
   };
 
-  const baixarPDF = async (id) => {
+  const baixarPDF = async (id: string) => {
     try {
       const response = await fetch(`http://localhost:8000/laudos/${id}/pdf`, {
         headers: {
@@ -110,7 +109,7 @@ const HistoricoDiagnosticos = () => {
             <div className="text-center py-8">Carregando diagnósticos...</div>
           ) : (
             <div className="space-y-4">
-              {filtrarDiagnosticos().map((diagnostico) => (
+              {filtrarDiagnosticos().map((diagnostico: any) => (
                 <Card key={diagnostico.id} className="bg-gray-50">
                   <CardContent className="p-4">
                     <div className="flex justify-between items-start">
