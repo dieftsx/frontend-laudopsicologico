@@ -1,0 +1,74 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  id        String   @id @default(uuid()) @db.Uuid
+  nome      String
+  email     String   @unique
+  senhaHash String   @map("senha_hash")
+  crp       String   @unique
+  criadoEm  DateTime @default(now()) @map("criado_em") @db.Timestamptz
+
+  // Relações
+  pacientes Paciente[]
+  laudos    Laudo[]
+
+  @@map("usuarios")
+}
+
+model Paciente {
+  id             String   @id @default(uuid()) @db.Uuid
+  usuarioId      String   @map("usuario_id") @db.Uuid
+  nome           String
+  idade          Int
+  dataNascimento DateTime? @map("data_nascimento") @db.Date
+  email          String?
+  telefone       String?
+  criadoEm       DateTime @default(now()) @map("criado_em") @db.Timestamptz
+  atualizadoEm   DateTime @default(now()) @map("atualizado_em") @db.Timestamptz
+
+  // Relações
+  usuario Usuario @relation(fields: [usuarioId], references: [id])
+  laudos  Laudo[]
+
+  @@map("pacientes")
+}
+
+model Laudo {
+  id           String   @id @default(uuid()) @db.Uuid
+  pacienteId   String   @map("paciente_id") @db.Uuid
+  usuarioId    String   @map("usuario_id") @db.Uuid
+  diagnostico  String?
+  status       String   @default("rascunho")
+  criadoEm     DateTime @default(now()) @map("criado_em") @db.Timestamptz
+  atualizadoEm DateTime @default(now()) @map("atualizado_em") @db.Timestamptz
+
+  // Relações
+  paciente  Paciente  @relation(fields: [pacienteId], references: [id])
+  usuario   Usuario   @relation(fields: [usuarioId], references: [id])
+  arquivos  Arquivo[]
+
+  @@map("laudos")
+}
+
+model Arquivo {
+  id           String   @id @default(uuid()) @db.Uuid
+  laudoId      String   @map("laudo_id") @db.Uuid
+  nomeOriginal String   @map("nome_original")
+  nomeArquivo  String   @map("nome_arquivo")
+  tipoArquivo  String   @map("tipo_arquivo")
+  tamanho      BigInt
+  path         String
+  criadoEm     DateTime @default(now()) @map("criado_em") @db.Timestamptz
+
+  // Relação
+  laudo Laudo @relation(fields: [laudoId], references: [id])
+
+  @@map("arquivos")
+}
